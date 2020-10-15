@@ -12,83 +12,102 @@ import json
 from pprint import pprint
 """Работа с файлом .json"""
 
-with open ('newsafr.json', encoding = 'utf-8') as f:
-    json_data = json.load(f)
+# with open ('newsafr.json', encoding = 'utf-8') as f:
+#     json_data = json.load(f)
 
-news = json_data["rss"]["channel"]["items"]
+def open_file(name_file):
+    with open(name_file, encoding='utf-8') as f:
+        json_data = json.load(f)
+    return json_data
+# print(open_file('newsafr.json'))
 
-def sort_list(list_):
-    return list_[1]
-
-def number_of_repetitions_json():
+def list_words_json(file_contents):
+ news = file_contents["rss"]["channel"]["items"]
  results = []
  for new in news:
   results.append(new['description'].split())
- general_list = []
- list_json = []
- for elem in results:
-     for el in elem:
-         if len(el) > 6:
-             general_list.append(el)
- for word in general_list:
-     if general_list.count(word) > 1:
-         if [word, general_list.count(word)] not in list_json:
-             list_json.append([word, general_list.count(word)])
- for elem in list_json:
-  list_json.sort(key=sort_list, reverse=True)
- return  list_json
+ return results
+# print(list_words_json(open_file('newsafr.json')))
 
-# pprint(number_of_repetitions_json()[0:10])
-def popular_words_output_json():
-   popular_words =''
-   for el in number_of_repetitions_json()[0:10]:
-    popular_words +=el[0] +'\n'
-   return f'Топ 10 самых часто встречающихся в новостях слов длиннее 6 символов:\n{popular_words}'
+def filtration_by_length(list_news,min_len):
+    filtr_list = []
+    for news in list_news:
+        for word in news:
+         if len(word) > min_len:
+            filtr_list.append(word)
+    return filtr_list
+# print(filtration_by_length(list_words_json(open_file('newsafr.json')),6))
 
-print(popular_words_output_json())
+def word_repetition_rate(word_list):
+    word_periodicity = {}
+    for word in word_list:
+        word_periodicity[word] = word_periodicity.get(word, 0) + 1
+    return word_periodicity
+# pprint(word_repetition_rate(filtration_by_length(list_words_json(open_file('newsafr.json')),6)))
+
+def sorted_word_periodicity(dict_word_periodicity):
+    word_periodicity_sorted = sorted(dict_word_periodicity.items(), key=lambda x: x[1], reverse=True)
+    return word_periodicity_sorted[0:10]
+# pprint(sorted_word_periodicity(word_repetition_rate(filtration_by_length(list_words_json(open_file('newsafr.json')),6))))
+
+def output_popular_word_in_json(sorted_words):
+    popular_words = ''
+    # print(list(sorted_words))
+    for elem in sorted_words:
+        popular_words += elem[0] + '\n'
+    return f'Топ 10 самых часто встречающихся в новостях слов длиннее 6 символов:\n{popular_words}'
+print(output_popular_word_in_json(sorted_word_periodicity(word_repetition_rate(filtration_by_length(list_words_json(open_file('newsafr.json')),6)))))
+
+
+
+
 
 """Работа с файлом .xml"""
 
 import xml.etree.ElementTree as ET
-parser = ET.XMLParser(encoding="utf-8")
-tree = ET.parse("newsafr.xml", parser)
-root = tree.getroot()
+def open_file2(name_file):
+    parser = ET.XMLParser(encoding="utf-8")
+    tree = ET.parse(name_file, parser)
+    root = tree.getroot()
+    items = root.findall("channel/item")
+    return items
+# print(open_file2("newsafr.xml"))
 
-items = root.findall("channel/item")
+def list_words_xml(file_contents):
+ results = []
+ for item in file_contents:
+  results.append(item.find('description').text.split())
+ return results
+# print(list_words_xml(open_file2("newsafr.xml")))
 
-def sort_list(list_):
- return list_[1]
+def filtration_by_length2(list_news,min_len):
+    filtr_list = []
+    for news in list_news:
+        for word in news:
+         if len(word) > min_len:
+            filtr_list.append(word)
+    return filtr_list
+# print(filtration_by_length2(list_words_xml(open_file2("newsafr.xml")),6))
 
-def number_of_repetitions_xml():
-    results = []
-    for item in items:
-        results.append(item.find('description').text)
-        # pprint(item.find('description').text+'\n')
-    list_xml = []
-    general_list_2 = []
-    for str_ in results:
-        str_split = str_.split()
-        # print(str_split)
-        for elem in str_split:
-            if len(elem) > 6:
-                general_list_2.append(elem)
-    for word in general_list_2:
-        if general_list_2.count(word) > 1:
-            if [word, general_list_2.count(word)] not in list_xml:
-                list_xml.append([word, general_list_2.count(word)])
-    for elem in list_xml:
-     list_xml.sort(key=sort_list, reverse=True)
-    return  list_xml
+def word_repetition_rate2(word_list):
+    word_periodicity = {}
+    for word in word_list:
+        word_periodicity[word] = word_periodicity.get(word, 0) + 1
+    return word_periodicity
+# pprint(word_repetition_rate2(filtration_by_length2(list_words_xml(open_file2("newsafr.xml")),6)))
 
-# pprint(number_of_repetitions_xml()[0:10])
+def sorted_word_periodicity2(dict_word_periodicity):
+    word_periodicity_sorted = sorted(dict_word_periodicity.items(), key=lambda x: x[1], reverse=True)
+    return word_periodicity_sorted[0:10]
+# pprint(sorted_word_periodicity2(word_repetition_rate2(filtration_by_length2(list_words_xml(open_file2("newsafr.xml")),6))))
 
-def popular_words_output_xml():
-   popular_words =''
-   for el in number_of_repetitions_xml()[0:10]:
-    popular_words +=el[0] +'\n'
-   return f'Топ 10 самых часто встречающихся в новостях слов длиннее 6 символов:\n{popular_words}'
+def output_popular_word_in_xml(sorted_words):
+    popular_words = ''
+    for elem in sorted_words:
+        popular_words += elem[0] + '\n'
+    return f'Топ 10 самых часто встречающихся в новостях слов длиннее 6 символов:\n{popular_words}'
+print(output_popular_word_in_xml(sorted_word_periodicity2(word_repetition_rate2(filtration_by_length2(list_words_xml(open_file2("newsafr.xml")),6)))))
 
-print(popular_words_output_xml())
 
 
 
