@@ -12,9 +12,6 @@ import json
 from pprint import pprint
 """Работа с файлом .json"""
 
-# with open ('newsafr.json', encoding = 'utf-8') as f:
-#     json_data = json.load(f)
-
 def open_file(name_file):
     with open(name_file, encoding='utf-8') as f:
         json_data = json.load(f)
